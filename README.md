@@ -3,13 +3,13 @@
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Database Schema](#database-schema)
-3. [Web Routes](#web-routes)
-4. [API Endpoints](#api-endpoints)
+3. [API Endpoints](#api-endpoints)
     1. [Top Up](#top-up)
     2. [Withdraw](#withdraw)
     3. [Transfer](#transfer)
     4. [Balance](#balance)
     5. [Transactions](#transactions)
+4. [Web Routes](#web-routes)
 5. [Design Patterns](#design-patterns)
 6. [Authentication](#authentication)
 7. [Postman Collection](#postman-collection)
@@ -19,18 +19,86 @@
 11. [Running the Application](#running-the-application)
 
 ## Introduction
-This project provides a set of APIs and web views for managing a wallet system. Users can top-up, withdraw, transfer funds between wallets, and view transaction history. The API supports real-time balance updates and transaction tracking.
-
----
+This project provides a set of APIs for managing a wallet system. Users can top-up, withdraw, and transfer funds between wallets. The API also supports real-time balance updates and transaction tracking.
 
 ## Database Schema
-
 ### Entities and Attributes:
 - **users**: id, name, email, password, email_verified_at
 - **wallets**: id, user_id, balance, created_at, updated_at
 - **transactions**: id, wallet_id, type (topup, withdraw, transfer, fee), amount, recipient_wallet_id, fee, created_at, updated_at
 
----
+## API Endpoints
+
+### 1. Top Up
+**Endpoint:** `/api/wallet/topup`  
+**Method:** POST  
+**Description:** Add funds to the wallet.
+
+**Headers:**
+- Content-Type: "application/json"
+- Accept: "application/json"
+- Authorization: "Bearer {{token}}"
+
+**Request Body:**
+```json
+{
+    "amount": 500
+}
+```
+
+**Response Example:**
+```json
+{
+    "status": "success",
+    "message": "Top-up successful",
+    "data": {
+        "balance": {
+            "wallet_number": 1,
+            "balance": "500.00",
+            "user": {
+                "name": "John Doe",
+                "email": "john@example.com"
+            }
+        }
+    }
+}
+```
+
+### 2. Withdraw
+**Endpoint:** `/api/wallet/withdraw`  
+**Method:** POST  
+**Description:** Withdraw funds from the wallet.
+
+**Request Body:**
+```json
+{
+    "amount": 200
+}
+```
+
+### 3. Transfer
+**Endpoint:** `/api/wallet/transfer`  
+**Method:** POST  
+**Description:** Transfer funds to another user's wallet.
+
+**Request Body:**
+```json
+{
+    "recipient_id": 2,
+    "amount": 100
+}
+```
+
+### 4. Balance
+**Endpoint:** `/api/wallet/balance`  
+**Method:** GET  
+**Description:** Retrieve the current balance.
+
+### 5. Transactions
+**Endpoint:** `/api/wallet/transactions`  
+**Method:** GET  
+**Description:** Retrieve the list of all transactions for the authenticated user.
+
 
 ## Web Routes
 
@@ -86,94 +154,69 @@ These routes define the user-facing pages for managing wallet functionalities th
 
 ---
 
-## API Endpoints
 
-These routes are used to interact with the wallet system via APIs. The endpoints are protected with Laravel Sanctum for authentication.
+## Design Patterns
 
-### 1. **Top Up**
-**Endpoint:** `/api/wallet/topup`  
-**Method:** POST  
-**Description:** Add funds to the wallet.
+### 1. **Strategy Design Pattern:**
+This pattern is used to calculate fees for transactions like withdrawals and transfers. Depending on the amount, a different fee strategy is applied to ensure a flexible and scalable system.
 
-**Headers:**
-- Content-Type: "application/json"
-- Accept: "application/json"
-- Authorization: "Bearer {{token}}"
+### Example:
+- For amounts greater than $25, a higher fee percentage is applied using the `HighAmountFeeStrategy`.
+- For smaller amounts, `LowAmountFeeStrategy` is used.
 
-**Request Body:**
-```json
-{
-    "amount": 500
-}
-```
+### 2. **Repository Pattern:**
+All data interactions are handled using repositories to ensure loose coupling and better separation of concerns.
 
-**Response Example:**
-```json
-{
-    "status": "success",
-    "message": "Top-up successful",
-    "data": {
-        "balance": {
-            "wallet_number": 1,
-            "balance": "500.00",
-            "user": {
-                "name": "John Doe",
-                "email": "john@example.com"
-            }
-        }
-    }
-}
-```
+## Authentication
+Authentication is handled via Laravel Sanctum. You must pass the `Bearer token` in the request headers to access protected routes.
 
-### 2. **Withdraw**
-**Endpoint:** `/api/wallet/withdraw`  
-**Method:** POST  
-**Description:** Withdraw funds from the wallet.
+## Postman Collection
+A Postman collection is available with all the API endpoints for easy testing and integration. It includes example requests and expected responses.
 
-**Request Body:**
-```json
-{
-    "amount": 200
-}
-```
+**Link to Postman Collection:** [Postman Collection](#https://api.postman.com/collections/6208228-85510af4-b0fd-4767-8106-b61fefd71cd2?access_key=PMAT-01J8168577D9RZ48G4TZDA676P)  
+Please update the environment variables in Postman:
+- `app_url`: Your app link
+- `token`: Retrieved after login.
 
-### 3. **Transfer**
-**Endpoint:** `/api/wallet/transfer`  
-**Method:** POST  
-**Description:** Transfer funds to another user's wallet.
+## Requirements
+- PHP 8.2
+- MySQL 5.7+
+- Laravel 10.x
 
-**Request Body:**
-```json
-{
-    "recipient_id": 2,
-    "amount": 100
-}
-```
-
-### 4. **Balance**
-**Endpoint:** `/api/wallet/balance`  
-**Method:** GET  
-**Description:** Retrieve the current balance.
-
-### 5. **Transactions**
-**Endpoint:** `/api/wallet/transactions`  
-**Method:** GET  
-**Description:** Retrieve the list of all transactions for the authenticated user.
-
----
+## Getting Started
+1. Clone this repository:
+    ```bash
+    git clone https://github.com/salmazz/fin-tech-app.git
+    cd fin-tech-app
+    ```
+2. Set up the environment:
+    ```bash
+    cp .env.example .env
+    composer install
+    composer dumpautoload
+    ```
+3. Set up the database:
+    ```bash
+    php artisan migrate --seed
+    ```
+   
 
 ## Testing
+To run the tests:
+```bash
+php artisan test
+```
 
-To ensure the functionality of both the **UI web app** and **API routes**, the following test cases are implemented:
+### Test Coverage:
 
-### Web Test Cases:
+#### Web Test Cases:
 
 - **Home Page Test:** Ensures the home page displays the correct user balance and wallet information.
 - **Top Up Test:** Verifies that a user can successfully top-up their wallet through the UI.
 - **Withdraw Test:** Verifies that a user can withdraw funds from their wallet via the web interface.
 - **Transaction History Test:** Ensures that the transaction history page correctly paginates and displays transactions.
 
-### API Test Cases:
+#### API Test Cases:
 
 - **Top Up API Test:** Ensures that the `/api/wallet/topup` endpoint works correctly and updates the wallet balance.
 - **Withdraw API Test:** Verifies that the `/api/wallet/withdraw` endpoint successfully processes withdrawals.
@@ -182,55 +225,4 @@ To ensure the functionality of both the **UI web app** and **API routes**, the f
 
 ---
 
-## Routes File Structure
-
-### Web Routes (`routes/web.php`)
-```php
-Route::get('/', function () {
-    return view('landing-page');
-})->name('landing-page');
-
-// Authentication Routes
-Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('login', [AuthController::class, 'login']);
-Route::get('register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('register', [AuthController::class, 'register']);
-Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/home', HomeController::class)->name('home');
-    Route::get('/transactions', TransactionsController::class)->name('transactions');
-});
-
-Route::middleware('auth')->name('wallet.')->group(function () {
-    Route::get('wallet/topup', [WalletController::class, 'showTopUpForm'])->name('topUp');
-    Route::post('wallet/topup', [WalletController::class, 'handleTopUp'])->name('topUp.submit');
-
-    Route::get('wallet/withdraw', [WalletController::class, 'showWithdrawForm'])->name('withdraw');
-    Route::post('wallet/withdraw', [WalletController::class, 'handleWithdraw'])->name('withdraw.submit');
-
-    Route::get('wallet/transfer', [WalletController::class, 'showTransferForm'])->name('transfer');
-    Route::post('wallet/transfer', [WalletController::class, 'handleTransfer'])->name('transfer.submit');
-});
-```
-
-### API Routes (`routes/api.php`)
-```php
-Route::group(['name' => 'auth.'], function () {
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('register', [AuthController::class, 'register']);
-
-    Route::group(['middleware' => 'auth:sanctum'], function() {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('user', [AuthController::class, 'user']);
-    });
-});
-
-Route::middleware('auth:sanctum')->name('wallet.')->prefix('wallet')->group(function () {
-    Route::post('/topup', [WalletController::class, 'topUp']);
-    Route::post('/withdraw', [WalletController::class, 'withdraw']);
-    Route::post('/transfer', [WalletController::class, 'transfer']);
-    Route::get('/balance', [WalletController::class, 'balance']);
-    Route::get('/transactions', [WalletController::class, 'transactions']);
-});
-```
+Feel free to adjust any details to better suit your project setup!
