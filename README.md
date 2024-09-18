@@ -173,7 +173,7 @@ Authentication is handled via Laravel Sanctum. You must pass the `Bearer token` 
 ## Postman Collection
 A Postman collection is available with all the API endpoints for easy testing and integration. It includes example requests and expected responses.
 
-**Link to Postman Collection:** [Postman Collection](#https://api.postman.com/collections/6208228-85510af4-b0fd-4767-8106-b61fefd71cd2?access_key=PMAT-01J8168577D9RZ48G4TZDA676P)  
+**Link to Postman Collection:** [Postman Collection](#https://elements.getpostman.com/redirect?entityId=6208228-85510af4-b0fd-4767-8106-b61fefd71cd2&entityType=collection)  
 Please update the environment variables in Postman:
 - `app_url`: Your app link
 - `token`: Retrieved after login.
